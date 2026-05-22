@@ -41,7 +41,7 @@ fun App() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Tercer cambio rama2")
+                    Text("Cambio desde rama2")
                 }
             }
         }
