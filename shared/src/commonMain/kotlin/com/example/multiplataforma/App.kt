@@ -32,7 +32,7 @@ fun App() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Button(onClick = { showContent = !showContent }) {
-                Text("Tercer cambio rama1")
+                Text("Cambio desde rama1")
             }
             AnimatedVisibility(showContent) {
                 val greeting = remember { Greeting().greet() }
