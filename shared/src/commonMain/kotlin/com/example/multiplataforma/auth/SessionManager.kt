@@ -1,9 +1,5 @@
 package com.example.multiplataforma.auth
 
-/**
- * SessionManager - El guardián de la sesión (Simulado para Multiplataforma)
- * Banelly - Módulo Auth
- */
 class SessionManager {
 
     private var isLoggedIn = false
