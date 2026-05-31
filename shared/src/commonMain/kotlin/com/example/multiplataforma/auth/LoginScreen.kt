@@ -1,6 +1,5 @@
 package com.example.multiplataforma.auth
 
-// ── Imports de Compose ───────────────────────────────────────────────────────
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
