@@ -30,8 +30,7 @@ fun MapScreen() {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 1. EL MAPA
-            MapaFondo()
+
 
             // 2. TEXTOS SUPERIORES Y BANNER
             Column(
@@ -157,15 +156,6 @@ fun BarraSuperior() {
             Text("👤", fontSize = 20.sp)
         }
     }
-}
-
-@Composable
-fun MapaFondo() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF3E8FF))
-    )
 }
 
 @Composable
