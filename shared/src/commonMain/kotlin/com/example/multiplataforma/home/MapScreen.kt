@@ -30,9 +30,10 @@ fun MapScreen() {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // 1. EL MAPA (Se dibuja primero, queda al fondo)
+            MapaFondo()
 
-
-            // 2. TEXTOS SUPERIORES Y BANNER
+            // 2. TEXTOS SUPERIORES Y BANNER (Se dibujan encima del mapa)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -69,10 +70,11 @@ fun MapScreen() {
                 }
             }
 
-            // 3. BOTÓN SOS GIGANTE
+            // 3. BOTÓN SOS GIGANTE (Encima de todo)
             Button(
                 onClick = {
                     coroutineScope.launch {
+                        // Asegúrate de que enviarAlertaSOS esté definida o accesible
                         val exito = enviarAlertaSOS()
                         if (exito) mostrarDialogo = true
                     }
@@ -110,6 +112,8 @@ fun MapScreen() {
         }
     }
 }
+
+// ... (El resto de tus funciones BarraSuperior y BarraNavegacion se quedan igual)
 
 // =========================================================================
 // COMPONENTES SEPARADOS
