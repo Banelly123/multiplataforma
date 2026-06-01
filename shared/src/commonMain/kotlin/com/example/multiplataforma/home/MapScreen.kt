@@ -30,10 +30,10 @@ fun MapScreen() {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 1. EL MAPA (Se dibuja primero, queda al fondo)
+            // EL MAPA (Se dibuja primero, queda al fondo)
             MapaFondo()
 
-            // 2. TEXTOS SUPERIORES Y BANNER (Se dibujan encima del mapa)
+            // TEXTOS SUPERIORES Y BANNER (Se dibujan encima del mapa)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -70,7 +70,7 @@ fun MapScreen() {
                 }
             }
 
-            // 3. BOTÓN SOS GIGANTE (Encima de todo)
+            // BOTÓN SOS GIGANTE (Encima de todo)
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -113,11 +113,6 @@ fun MapScreen() {
     }
 }
 
-// ... (El resto de tus funciones BarraSuperior y BarraNavegacion se quedan igual)
-
-// =========================================================================
-// COMPONENTES SEPARADOS
-// =========================================================================
 
 @Composable
 fun BarraSuperior() {
@@ -125,7 +120,6 @@ fun BarraSuperior() {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            // ESTA LÍNEA ES LA MAGIA QUE EVITA QUE CHOCQUE CON EL RELOJ/CÁMARA:
             .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -153,7 +147,6 @@ fun BarraSuperior() {
                 .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFE9D5FF))
-                // ESTA LÍNEA ES LA MAGIA QUE PONE EL CONTORNO:
                 .border(width = 2.dp, color = Color(0xFF7C3AED), shape = CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -190,15 +183,15 @@ fun BarraNavegacion() {
         NavigationBarItem(
             selected = false,
             onClick = { },
-            icon = { Text("🗺️", fontSize = 24.sp) },
-            label = { Text("Rutas") },
+            icon = { Text("💬", fontSize = 24.sp) },
+            label = { Text("Comunidad") },
             colors = NavigationBarItemDefaults.colors(unselectedIconColor = Color.Gray, unselectedTextColor = Color.Gray)
         )
         NavigationBarItem(
             selected = false,
             onClick = { },
-            icon = { Text("⚙️", fontSize = 24.sp) },
-            label = { Text("Ajustes") },
+            icon = { Text("💡", fontSize = 24.sp) },
+            label = { Text("Recusos") },
             colors = NavigationBarItemDefaults.colors(unselectedIconColor = Color.Gray, unselectedTextColor = Color.Gray)
         )
     }

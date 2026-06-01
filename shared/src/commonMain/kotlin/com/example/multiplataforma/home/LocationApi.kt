@@ -8,7 +8,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-// 1. Configuramos nuestro "Navegador" interno para que entienda formato JSON
+// Configuramos nuestro "Navegador" interno para que entienda formato JSON
 val clienteHttp = HttpClient {
     install(ContentNegotiation) {
         json(Json {
@@ -19,7 +19,7 @@ val clienteHttp = HttpClient {
     }
 }
 
-// 2. Función que hará el POST a la API (Marcada como 'suspend' porque tarda un poco usando internet)
+// Función que hará el POST a la API (Marcada como 'suspend' porque tarda un poco usando internet)
 suspend fun enviarAlertaSOS(): Boolean {
     return try {
         // Aquí simulamos enviar la alerta con coordenadas reales aproximadas para nuestras pruebas

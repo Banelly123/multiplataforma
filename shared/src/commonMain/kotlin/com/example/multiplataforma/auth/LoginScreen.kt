@@ -150,7 +150,7 @@ fun LoginScreen(
             trailingIcon = {
                 IconButton(onClick = { verPassword = !verPassword }) {
                     Text(
-                        text = if (verPassword) "🙈" else "👁",
+                        text = if (verPassword) "🔓" else "🔒",
                         fontSize = 18.sp
                     )
                 }
