@@ -66,6 +66,8 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
             // La libreria que hace el trabajo de traducir los datos a JSON
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
+
+            implementation("androidx.activity:activity-compose:1.9.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
