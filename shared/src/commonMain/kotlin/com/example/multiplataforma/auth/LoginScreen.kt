@@ -26,7 +26,8 @@ private val FondoCampo        = Color(0xFFFFFFFF)   // fondo de los campos
 @Composable
 fun LoginScreen(
     sessionManager: SessionManager,
-    onLoginExitoso: () -> Unit
+    onLoginExitoso: () -> Unit,
+    onRegistroClick: () -> Unit // 👈 Agrega esta línea
 ) {
     // "remember" + "mutableStateOf" hacen que la variable sea reactiva:
     // cuando cambia, la pantalla se redibuja automáticamente.
@@ -279,7 +280,7 @@ fun LoginScreen(
         Row {
             Text("¿No tienes una cuenta? ", fontSize = 14.sp, color = TextoGris)
             TextButton(
-                onClick = { },
+                onClick = { onRegistroClick() },
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Text("Regístrate", fontSize = 14.sp, color = MoradoPrimario, fontWeight = FontWeight.Bold)
