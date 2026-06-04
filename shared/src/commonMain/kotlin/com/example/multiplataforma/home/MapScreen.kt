@@ -17,13 +17,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MapScreen() {
-    // 1. LA VARIABLE QUE CONTROLA LA NAVEGACIÓN
+    // LA VARIABLE QUE CONTROLA LA NAVEGACIÓN
     var pantallaActual by remember { mutableStateOf("Mapa") }
 
     Scaffold(
         topBar = { BarraSuperior() },
         bottomBar = {
-            // 2. LE PASAMOS EL CONTROL A LA BARRA
+            // LE PASAMOS EL CONTROL A LA BARRA
             BarraNavegacion(
                 pantallaSeleccionada = pantallaActual,
                 alSeleccionarPantalla = { nuevaPantalla -> pantallaActual = nuevaPantalla }
@@ -31,7 +31,7 @@ fun MapScreen() {
         }
     ) { paddingValues ->
 
-        // 3. LA MAGIA DEL CAMBIO DE PANTALLA
+        // LA MAGIA DEL CAMBIO DE PANTALLA
         when (pantallaActual) {
             "Mapa" -> ContenidoMapa(paddingValues)
             "Contactos" -> ContactosScreen(paddingValues) // Asegúrate de tener este archivo creado
@@ -41,9 +41,9 @@ fun MapScreen() {
     }
 }
 
-// -----------------------------------------------------------
-// Aislamos el contenido del mapa en su propia función
-// -----------------------------------------------------------
+
+// contenido del mapa en su propia función
+
 @Composable
 fun ContenidoMapa(paddingValues: PaddingValues) {
     val coroutineScope = rememberCoroutineScope()
@@ -90,9 +90,9 @@ fun ContenidoMapa(paddingValues: PaddingValues) {
     }
 }
 
-// -----------------------------------------------------------
+
 // BARRAS
-// -----------------------------------------------------------
+
 @Composable
 fun BarraSuperior() {
     Row(

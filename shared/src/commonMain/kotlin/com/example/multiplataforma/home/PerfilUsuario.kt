@@ -28,9 +28,9 @@ fun BotonPerfilUsuario() {
 
     var tieneFotoSubida by remember { mutableStateOf(false) }
 
-    // ==========================================
-    // ¡AQUÍ INICIAMOS EL LANZADOR DE GALERÍA!
-    // ==========================================
+
+    //  LANZADOR DE GALERÍA
+
     val abrirGaleria = LanzadorDeGaleria { uriSeleccionada ->
         // Esto pasa cuando regresas de la galería habiendo elegido una foto
         println("✅ [APP_LOCAL] Ruta de la foto: $uriSeleccionada")

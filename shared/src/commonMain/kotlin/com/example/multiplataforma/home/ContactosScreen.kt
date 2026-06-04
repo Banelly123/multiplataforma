@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.multiplataforma.core.AlmacenamientoLocal
+import kotlinx.coroutines.launch
 
 data class ContactoSeguro(
     val nombre: String,
@@ -33,6 +34,12 @@ fun ContactosScreen(paddingValues: PaddingValues) {
     var direccion by remember { mutableStateOf("") }
 
     val almacenamiento = remember { AlmacenamientoLocal() }
+
+
+    //PREPARAMOS EL SERVICIO
+
+    val servicioContactos = remember { ContactosService() }
+    val coroutineScope = rememberCoroutineScope()
 
     var listaContactos by remember {
         mutableStateOf(cargarContactosGuardados(almacenamiento.leerContactos()))
@@ -96,9 +103,20 @@ fun ContactosScreen(paddingValues: PaddingValues) {
                 if (nombre.isNotBlank() && numero.isNotBlank()) {
                     val nuevoContacto = ContactoSeguro(nombre, numero, parentesco, direccion)
                     val nuevaLista = listOf(nuevoContacto) + listaContactos
+
+                    //Guardado Local
                     listaContactos = nuevaLista
                     val textoParaGuardar = convertirListaAString(nuevaLista)
                     almacenamiento.guardarContactos(textoParaGuardar)
+
+
+                    // LLAMADA A END-POINT
+
+                    coroutineScope.launch {
+                        servicioContactos.enviarContactoAlServidor(nuevoContacto)
+                    }
+
+                    // Limpiamos los campos
                     nombre = ""; numero = ""; parentesco = ""; direccion = ""
                 }
             },
@@ -136,16 +154,10 @@ fun ContactosScreen(paddingValues: PaddingValues) {
                             Text(contacto.numero, color = Color.Gray, fontSize = 14.sp)
                         }
 
-                        // ==========================================
-                        // ¡AQUÍ ESTÁ LA MAGIA DEL BOTÓN DE ELIMINAR!
-                        // ==========================================
                         IconButton(
                             onClick = {
-                                // 1. Filtramos la lista para quitar el contacto que tocamos
                                 val listaActualizada = listaContactos.filter { it != contacto }
-                                // 2. Actualizamos la pantalla
                                 listaContactos = listaActualizada
-                                // 3. Guardamos la nueva lista en el disco duro
                                 almacenamiento.guardarContactos(convertirListaAString(listaActualizada))
                                 println("🗑️ [APP_LOCAL] Contacto eliminado: ${contacto.nombre}")
                             }
