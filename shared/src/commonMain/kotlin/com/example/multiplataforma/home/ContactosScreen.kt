@@ -34,141 +34,153 @@ fun ContactosScreen(paddingValues: PaddingValues) {
     var direccion by remember { mutableStateOf("") }
 
     val almacenamiento = remember { AlmacenamientoLocal() }
-
-
-    //PREPARAMOS EL SERVICIO
-
     val servicioContactos = remember { ContactosService() }
+
+    val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
     var listaContactos by remember {
         mutableStateOf(cargarContactosGuardados(almacenamiento.leerContactos()))
     }
 
-    Column(
+
+    // aquí en el Box principal
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(paddingValues)
-            .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
         ) {
-            Text(
-                text = "Contactos de\nConfianza",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF1A1A1A),
-                lineHeight = 32.sp
-            )
-            Text(text = "Añadir", color = Color(0xFF7C3AED), fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = nombre, onValueChange = { nombre = it },
-            label = { Text("Nombre") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = numero, onValueChange = { numero = it },
-            label = { Text("Número de Teléfono") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = parentesco, onValueChange = { parentesco = it },
-            label = { Text("Parentesco") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = {
-                if (nombre.isNotBlank() && numero.isNotBlank()) {
-                    val nuevoContacto = ContactoSeguro(nombre, numero, parentesco, direccion)
-                    val nuevaLista = listOf(nuevoContacto) + listaContactos
-
-                    //Guardado Local
-                    listaContactos = nuevaLista
-                    val textoParaGuardar = convertirListaAString(nuevaLista)
-                    almacenamiento.guardarContactos(textoParaGuardar)
-
-
-                    // LLAMADA A END-POINT
-
-                    coroutineScope.launch {
-                        servicioContactos.enviarContactoAlServidor(nuevoContacto)
-                    }
-
-                    // Limpiamos los campos
-                    nombre = ""; numero = ""; parentesco = ""; direccion = ""
-                }
-            },
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED))
-        ) {
-            Text("Guardar Contacto Local", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Lista de Contactos
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(listaContactos) { contacto ->
-                val iniciales = contacto.nombre.split(" ").take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.size(50.dp).clip(CircleShape).background(Color(0xFF9F7AEA)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(iniciales, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(contacto.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1A1A1A))
-                            Text(contacto.parentesco, color = Color(0xFF7C3AED), fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                            Text(contacto.numero, color = Color.Gray, fontSize = 14.sp)
-                        }
-
-                        IconButton(
-                            onClick = {
-                                val listaActualizada = listaContactos.filter { it != contacto }
-                                listaContactos = listaActualizada
-                                almacenamiento.guardarContactos(convertirListaAString(listaActualizada))
-                                println("🗑️ [APP_LOCAL] Contacto eliminado: ${contacto.nombre}")
-                            }
-                        ) {
-                            Text("🗑️", fontSize = 20.sp)
-                        }
-                    }
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Contactos de\nConfianza",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF1A1A1A),
+                    lineHeight = 32.sp
+                )
+                Text(text = "Añadir", color = Color(0xFF7C3AED), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
-            item { Spacer(modifier = Modifier.height(20.dp)) }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedTextField(
+                value = nombre, onValueChange = { nombre = it },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = numero, onValueChange = { numero = it },
+                label = { Text("Número de Teléfono") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = parentesco, onValueChange = { parentesco = it },
+                label = { Text("Parentesco") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    if (nombre.isNotBlank() && numero.isNotBlank()) {
+                        val nuevoContacto = ContactoSeguro(nombre, numero, parentesco, direccion)
+                        val nuevaLista = listOf(nuevoContacto) + listaContactos
+
+                        listaContactos = nuevaLista
+                        almacenamiento.guardarContactos(convertirListaAString(nuevaLista))
+
+                        coroutineScope.launch {
+                            servicioContactos.enviarContactoAlServidor(nuevoContacto)
+                            // borrar cualquier mensaje anterior
+                            snackbarHostState.currentSnackbarData?.dismiss()
+                            snackbarHostState.showSnackbar("¡Contacto $nombre guardado!")
+                        }
+
+                        nombre = ""; numero = ""; parentesco = ""; direccion = ""
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED))
+            ) {
+                Text("Guardar Contacto Local", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(listaContactos) { contacto ->
+                    val iniciales = contacto.nombre.split(" ").take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier.size(50.dp).clip(CircleShape).background(Color(0xFF9F7AEA)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(iniciales, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(contacto.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1A1A1A))
+                                Text(contacto.parentesco, color = Color(0xFF7C3AED), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                                Text(contacto.numero, color = Color.Gray, fontSize = 14.sp)
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    val listaActualizada = listaContactos.filter { it != contacto }
+                                    listaContactos = listaActualizada
+                                    almacenamiento.guardarContactos(convertirListaAString(listaActualizada))
+
+                                    coroutineScope.launch {
+                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                        snackbarHostState.showSnackbar("Contacto eliminado")
+                                    }
+                                }
+                            ) {
+                                Text("🗑️", fontSize = 20.sp)
+                            }
+                        }
+                    }
+                }
+                item { Spacer(modifier = Modifier.height(80.dp)) }
+            }
         }
+
+        // La notificación
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp)
+        )
     }
 }
 
