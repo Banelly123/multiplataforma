@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 @Composable
-fun MapScreen() {
+fun MapScreen(onCerrarSesion: () -> Unit) {
     // 1. LA VARIABLE QUE CONTROLA LA NAVEGACIÓN
     var pantallaActual by remember { mutableStateOf("Mapa") }
 
     Scaffold(
-        topBar = { BarraSuperior() },
+        topBar = { BarraSuperior(onCerrarSesion) },
         bottomBar = {
             // 2. LE PASAMOS EL CONTROL A LA BARRA
             BarraNavegacion(
@@ -94,7 +94,7 @@ fun ContenidoMapa(paddingValues: PaddingValues) {
 // BARRAS
 // -----------------------------------------------------------
 @Composable
-fun BarraSuperior() {
+fun BarraSuperior(onCerrarSesion: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().background(Color.White).statusBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -104,7 +104,7 @@ fun BarraSuperior() {
             Text("☰", fontSize = 28.sp, color = Color(0xFF581C87), modifier = Modifier.padding(end = 16.dp))
             Text("Aliadas", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF7C3AED))
         }
-        BotonPerfilUsuario()
+        BotonPerfilUsuario(onCerrarSesion) // Aquí le pasamos la acción final
     }
 }
 

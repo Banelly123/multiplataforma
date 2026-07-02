@@ -1,36 +1,61 @@
 package com.example.multiplataforma.auth
 
-import kotlinx.coroutines.delay
+import io.ktor.client.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 @Serializable
-data class RegistroRequestDto(
-    val nombre: String,
-    val correo: String,
-    val contrasenia: String
-)
+data class RegistroRequestDto(val nombre: String, val correo: String, val contrasenia: String)
+
+@Serializable
+data class LoginRequestDto(val correo: String, val contrasenia: String)
 
 object AuthService {
 
-    // Función asíncrona que invoca tu pantalla al presionar el botón de "Registrarse"
+    // 1. Configuramos el cliente para que hable en JSON
+    private val client = HttpClient {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
+    // 2. FUNCIÓN REAL DE REGISTRO
     suspend fun enviarRegistroAlServidor(nombre: String, correo: String, contrasenia: String): Boolean {
         return try {
-            // Construcción y simulación del envío de la solicitud mediante Ktor
-            val peticionJson = RegistroRequestDto(nombre, correo, contrasenia)
+            val peticion = RegistroRequestDto(nombre, correo, contrasenia)
 
-            println("📡 [KTOR CLIENT] Enviando al servidor local -> Usuario: ${peticionJson.nombre} (${peticionJson.correo})")
+            val response = client.post("http://10.0.2.2:8080/registro") {
+                contentType(ContentType.Application.Json)
+                setBody(peticion)
+            }
 
-            // Esto permite que el CircularProgressIndicator de tu pantalla gire en tiempo real
-            delay(1500)
-
-            // Retorna un código simulado equivalente a un HttpStatusCode.Created (201)
-            val codigoRespuestaSimulado = 201
-
-            // Retorna 'true' si el código es 201, validando el éxito en el cliente
-            codigoRespuestaSimulado == 201
-
+            println("✅ [RED] Registro respondió con código: ${response.status}")
+            response.status.value in 200..299
         } catch (e: Exception) {
-            e.printStackTrace()
+            println("❌ [RED] Error crítico en registro: ${e.message}")
+            false
+        }
+    }
+
+    // 3. NUEVA FUNCIÓN REAL DE LOGIN
+    suspend fun iniciarSesion(correo: String, contrasenia: String): Boolean {
+        return try {
+            val peticion = LoginRequestDto(correo, contrasenia)
+
+            val response = client.post("http://10.0.2.2:8080/login") {
+                contentType(ContentType.Application.Json)
+                setBody(peticion)
+            }
+
+            println("✅ [RED] Login respondió con código: ${response.status}")
+            response.status.value in 200..299
+        } catch (e: Exception) {
+            println("❌ [RED] Error crítico en login: ${e.message}")
             false
         }
     }

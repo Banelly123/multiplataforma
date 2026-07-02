@@ -1,25 +1,26 @@
 package com.example.multiplataforma.auth
 
-class SessionManager {
+import com.example.multiplataforma.core.AlmacenamientoLocal
 
-    private var isLoggedIn = false
-    private var userEmail: String? = null
+class SessionManager {
+    // Conectamos tu administrador con tu almacenamiento en disco
+    private val almacenamiento = AlmacenamientoLocal()
 
     fun guardarSesion(email: String) {
-        userEmail = email
-        isLoggedIn = true
+        almacenamiento.guardarEmailSesion(email)
     }
 
     fun cerrarSesion() {
-        userEmail = null
-        isLoggedIn = false
+        almacenamiento.borrarEmailSesion()
     }
 
     fun haySessionActiva(): Boolean {
-        return isLoggedIn
+        // Si hay un correo guardado y no está vacío, significa que hay sesión activa
+        return almacenamiento.leerEmailSesion().isNotBlank()
     }
 
     fun obtenerEmail(): String? {
-        return userEmail
+        val email = almacenamiento.leerEmailSesion()
+        return if (email.isNotBlank()) email else null
     }
 }

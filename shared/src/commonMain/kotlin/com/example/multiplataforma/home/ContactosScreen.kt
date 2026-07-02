@@ -1,6 +1,7 @@
 package com.example.multiplataforma.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.multiplataforma.core.AlmacenamientoLocal
+import com.example.multiplataforma.auth.SessionManager // ¡Importación agregada!
+import kotlinx.coroutines.launch
 
 data class ContactoSeguro(
     val nombre: String,
@@ -33,20 +36,26 @@ fun ContactosScreen(paddingValues: PaddingValues) {
     var direccion by remember { mutableStateOf("") }
 
     val almacenamiento = remember { AlmacenamientoLocal() }
+    val contactosService = remember { ContactosService() }
+    val coroutineScope = rememberCoroutineScope()
+    val sessionManager = remember { SessionManager() } // ¡La variable que te faltaba!
 
     var listaContactos by remember {
         mutableStateOf(cargarContactosGuardados(almacenamiento.leerContactos()))
     }
 
+    var mostrarFormulario by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color(0xFFFAFAFA))
             .padding(paddingValues)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Título y Botón Añadir
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -59,59 +68,71 @@ fun ContactosScreen(paddingValues: PaddingValues) {
                 color = Color(0xFF1A1A1A),
                 lineHeight = 32.sp
             )
-            Text(text = "Añadir", color = Color(0xFF7C3AED), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+            Text(
+                text = if (mostrarFormulario) "Cancelar" else "Añadir",
+                color = if (mostrarFormulario) Color.Red else Color(0xFF7C3AED),
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                modifier = Modifier.clickable {
+                    mostrarFormulario = !mostrarFormulario
+                    if (!mostrarFormulario) { nombre = ""; numero = ""; parentesco = ""; direccion = "" }
+                }.padding(8.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedTextField(
-            value = nombre, onValueChange = { nombre = it },
-            label = { Text("Nombre") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        // FORMULARIO
+        if (mostrarFormulario) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(value = numero, onValueChange = { numero = it }, label = { Text("Número de Teléfono") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(value = parentesco, onValueChange = { parentesco = it }, label = { Text("Parentesco") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(value = direccion, onValueChange = { direccion = it }, label = { Text("Dirección") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = numero, onValueChange = { numero = it },
-            label = { Text("Número de Teléfono") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            if (nombre.isNotBlank() && numero.isNotBlank()) {
+                                val nuevoContacto = ContactoSeguro(nombre, numero, parentesco, direccion)
+                                val nuevaLista = listOf(nuevoContacto) + listaContactos
+                                listaContactos = nuevaLista
 
-        OutlinedTextField(
-            value = parentesco, onValueChange = { parentesco = it },
-            label = { Text("Parentesco") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.LightGray)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+                                // Guardado Local
+                                almacenamiento.guardarContactos(convertirListaAString(nuevaLista))
 
-        Button(
-            onClick = {
-                if (nombre.isNotBlank() && numero.isNotBlank()) {
-                    val nuevoContacto = ContactoSeguro(nombre, numero, parentesco, direccion)
-                    val nuevaLista = listOf(nuevoContacto) + listaContactos
-                    listaContactos = nuevaLista
-                    val textoParaGuardar = convertirListaAString(nuevaLista)
-                    almacenamiento.guardarContactos(textoParaGuardar)
-                    nombre = ""; numero = ""; parentesco = ""; direccion = ""
+                                // Envío a Railway
+                                coroutineScope.launch {
+                                    val miCorreo = sessionManager.obtenerEmail() ?: ""
+                                    contactosService.enviarContactoAlServidor(nuevoContacto, miCorreo)
+                                }
+
+                                nombre = ""; numero = ""; parentesco = ""; direccion = ""
+                                mostrarFormulario = false
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED))
+                    ) {
+                        Text("Guardar Contacto", fontWeight = FontWeight.Bold)
+                    }
                 }
-            },
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED))
-        ) {
-            Text("Guardar Contacto Local", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Lista de Contactos
+        // LISTA DE CONTACTOS
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(listaContactos) { contacto ->
                 val iniciales = contacto.nombre.split(" ").take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
@@ -123,31 +144,25 @@ fun ContactosScreen(paddingValues: PaddingValues) {
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.size(50.dp).clip(CircleShape).background(Color(0xFF9F7AEA)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(iniciales, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Box(modifier = Modifier.size(50.dp).clip(CircleShape).background(Color(0xFFF3E8FF)), contentAlignment = Alignment.Center) {
+                            Text(iniciales, color = Color(0xFF7C3AED), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(contacto.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1A1A1A))
-                            Text(contacto.parentesco, color = Color(0xFF7C3AED), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                            Text(contacto.parentesco, color = Color(0xFF7C3AED), fontSize = 13.sp)
                             Text(contacto.numero, color = Color.Gray, fontSize = 14.sp)
                         }
-
-                        // ==========================================
-                        // ¡AQUÍ ESTÁ LA MAGIA DEL BOTÓN DE ELIMINAR!
-                        // ==========================================
                         IconButton(
                             onClick = {
-                                // 1. Filtramos la lista para quitar el contacto que tocamos
-                                val listaActualizada = listaContactos.filter { it != contacto }
-                                // 2. Actualizamos la pantalla
-                                listaContactos = listaActualizada
-                                // 3. Guardamos la nueva lista en el disco duro
-                                almacenamiento.guardarContactos(convertirListaAString(listaActualizada))
-                                println("🗑️ [APP_LOCAL] Contacto eliminado: ${contacto.nombre}")
+                                coroutineScope.launch {
+                                    val exito = contactosService.eliminarContactoDelServidor(contacto.numero)
+                                    if (exito) {
+                                        val listaActualizada = listaContactos.filter { it != contacto }
+                                        listaContactos = listaActualizada
+                                        almacenamiento.guardarContactos(convertirListaAString(listaActualizada))
+                                    }
+                                }
                             }
                         ) {
                             Text("🗑️", fontSize = 20.sp)
@@ -160,21 +175,15 @@ fun ContactosScreen(paddingValues: PaddingValues) {
     }
 }
 
+// Funciones de ayuda
 fun convertirListaAString(lista: List<ContactoSeguro>): String {
     return lista.joinToString(";;") { "${it.nombre}|${it.numero}|${it.parentesco}|${it.direccion}" }
 }
 
 fun cargarContactosGuardados(textoLeido: String): List<ContactoSeguro> {
-    if (textoLeido.isBlank()) {
-        return listOf(
-            ContactoSeguro("Elena Garcia", "+52 775 000 0000", "Mamá", "Centro, Tulancingo"),
-            ContactoSeguro("Roberto López", "+52 775 111 2222", "Pareja", "Col. Vicente Guerrero")
-        )
-    }
+    if (textoLeido.isBlank()) return emptyList()
     return textoLeido.split(";;").mapNotNull { fragmento ->
         val partes = fragmento.split("|")
-        if (partes.size == 4) {
-            ContactoSeguro(partes[0], partes[1], partes[2], partes[3])
-        } else null
+        if (partes.size == 4) ContactoSeguro(partes[0], partes[1], partes[2], partes[3]) else null
     }
 }

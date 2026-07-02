@@ -33,7 +33,12 @@ fun App() {
         // Control de navegación mediante estructura condicional
         when (pantallaActual) {
             Pantalla.MAPA -> {
-                MapScreen()
+                MapScreen(
+                    onCerrarSesion = {
+                        sessionManager.cerrarSesion() // Borra el archivo físico
+                        pantallaActual = Pantalla.LOGIN // Te regresa al inicio
+                    }
+                )
             }
 
             Pantalla.LOGIN -> {
