@@ -1,5 +1,11 @@
 package com.example.multiplataforma.core
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -30,41 +36,55 @@ fun App() {
             )
         }
 
-        // Control de navegación mediante estructura condicional
-        when (pantallaActual) {
-            Pantalla.MAPA -> {
-                MapScreen(
-                    onCerrarSesion = {
-                        sessionManager.cerrarSesion() // Borra el archivo físico
-                        pantallaActual = Pantalla.LOGIN // Te regresa al inicio
-                    }
+        // ANIMACIÓN DE TRANSICIÓN PREMIUM
+        AnimatedContent(
+            targetState = pantallaActual,
+            transitionSpec = {
+                // Configuración de la animación:
+                // Tarda 600ms, entra desde abajo y se desvanece suavemente
+                (fadeIn(animationSpec = tween(600)) + slideInVertically(
+                    animationSpec = tween(600),
+                    initialOffsetY = { altoTotal -> altoTotal / 6 }
+                )).togetherWith(
+                    fadeOut(animationSpec = tween(400))
                 )
-            }
+            },
+            label = "AnimacionDePantallas"
+        ) { pantalla ->
+            // Control de navegación dentro de la animación
+            when (pantalla) {
+                Pantalla.MAPA -> {
+                    MapScreen(
+                        onCerrarSesion = {
+                            sessionManager.cerrarSesion()
+                            pantallaActual = Pantalla.LOGIN
+                        }
+                    )
+                }
 
-            Pantalla.LOGIN -> {
-                LoginScreen(
-                    sessionManager = sessionManager,
-                    onLoginExitoso = {
-                        pantallaActual = Pantalla.MAPA
-                    },
-                    onRegistroClick = {
-                        pantallaActual = Pantalla.REGISTRO // 👈 ¡Esto cambia la pantalla dinámicamente!
-                    }
-                )
-            }
+                Pantalla.LOGIN -> {
+                    LoginScreen(
+                        sessionManager = sessionManager,
+                        onLoginExitoso = {
+                            pantallaActual = Pantalla.MAPA
+                        },
+                        onRegistroClick = {
+                            pantallaActual = Pantalla.REGISTRO
+                        }
+                    )
+                }
 
-            Pantalla.REGISTRO -> {
-                // TU PANTALLA DE EXAMEN TOTALMENTE INTEGRADA
-                RegisterScreen(
-                    sessionManager = sessionManager,
-                    onRegistroExitoso = {
-                        // Cumple Fase 8: Cambia la UI de forma local al mapa tras salvar sesión
-                        pantallaActual = Pantalla.MAPA
-                    },
-                    onIrALogin = {
-                        pantallaActual = Pantalla.LOGIN // Permite regresar al Login si ya tiene cuenta
-                    }
-                )
+                Pantalla.REGISTRO -> {
+                    // TU PANTALLA DE EXAMEN TOTALMENTE INTEGRADA
+                    RegisterScreen(
+                        onRegistroExitoso = {
+                            pantallaActual = Pantalla.MAPA
+                        },
+                        onLoginClick = {
+                            pantallaActual = Pantalla.LOGIN
+                        }
+                    )
+                }
             }
         }
     }
