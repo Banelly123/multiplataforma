@@ -24,20 +24,20 @@ import multiplataforma.shared.generated.resources.login
 import org.jetbrains.compose.resources.painterResource
 
 // ==========================================
-// PALETA DE COLORES PREMIUM Y EMPÁTICA
+// PALETA DE COLORES PREMIUM
 // ==========================================
-private val MoradoProfundo = Color(0xFF4A148C) // Seguridad y fuerza
-private val LilaSuave = Color(0xFFE1BEE7)      // Calidez y empatía
-private val AcentoPrincipal = Color(0xFF7C3AED) // Botones interactivos
+private val MoradoProfundo = Color(0xFF4A148C)
+private val LilaSuave = Color(0xFFE1BEE7)
+private val AcentoPrincipal = Color(0xFF7C3AED)
 private val TextoOscuro = Color(0xFF1F2937)
 private val TextoGris = Color(0xFF6B7280)
 
 @Composable
-fun LoginScreen(
-    sessionManager: SessionManager,
-    onLoginExitoso: () -> Unit,
-    onRegistroClick: () -> Unit
+fun RegisterScreen(
+    onRegistroExitoso: () -> Unit,
+    onLoginClick: () -> Unit
 ) {
+    var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var verPassword by remember { mutableStateOf(false) }
@@ -46,7 +46,7 @@ fun LoginScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    // 1. FONDO INMERSIVO (Estilo Instagram, colores seguros)
+    // FONDO INMERSIVO
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -56,40 +56,39 @@ fun LoginScreen(
                 )
             )
     ) {
-
-        // 2. ENCABEZADO (Logo y Bienvenida flotante)
+        // ENCABEZADO (Logo y Textos)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 80.dp),
+                .padding(top = 60.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // ¡AQUÍ ESTÁ TU LOGO OFICIAL!
+            // EL MISMO LOGO DEL LOGIN
             Image(
-                painter = painterResource(Res.drawable.login),
+                painter = painterResource(Res.drawable.login), // Usa la misma imagen
                 contentDescription = "Logo Oficial Aliadas",
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(26.dp)) // Recorta el fondo negro y lo deja curvo
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(26.dp))
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Aliadas",
-                fontSize = 28.sp,
+                text = "Crea tu cuenta",
+                fontSize = 26.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
                 letterSpacing = 1.sp
             )
             Text(
-                text = "Tu red, tu refugio.",
-                fontSize = 16.sp,
+                text = "Únete a la red segura de confianza.",
+                fontSize = 15.sp,
                 color = Color.White.copy(alpha = 0.9f)
             )
         }
 
-        // 3. TARJETA DE CONTENIDO (Estilo BBVA)
+        // TARJETA BLANCA INFERIOR
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -99,17 +98,27 @@ fun LoginScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 32.dp, vertical = 40.dp)
+                    .padding(horizontal = 32.dp, vertical = 32.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Bienvenida",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextoOscuro
+                // --- CAMPO NOMBRE ---
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre completo") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AcentoPrincipal,
+                        unfocusedBorderColor = Color(0xFFE5E7EB),
+                        focusedContainerColor = Color(0xFFF9FAFB),
+                        unfocusedContainerColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(32.dp))
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // --- CAMPO CORREO ---
                 OutlinedTextField(
@@ -128,7 +137,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // --- CAMPO CONTRASEÑA ---
                 OutlinedTextField(
@@ -152,71 +161,78 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // ¿Olvidaste tu contraseña? (Alineado a la derecha)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = {}, contentPadding = PaddingValues(0.dp)) {
-                        Text("¿Olvidaste tu contraseña?", fontSize = 13.sp, color = AcentoPrincipal)
-                    }
-                }
-
                 if (mensajeError.isNotEmpty()) {
-                    Text(text = mensajeError, color = Color.Red, fontSize = 13.sp, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(8.dp))
-                } else {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text = mensajeError, color = Color.Red, fontSize = 13.sp, modifier = Modifier.fillMaxWidth())
                 }
 
-                // --- BOTÓN DE INICIO DE SESIÓN ---
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // --- BOTÓN PRINCIPAL: REGISTRARSE ---
                 Button(
                     onClick = {
-                        mensajeError = ""
-                        when {
-                            email.isBlank() -> mensajeError = "Por favor ingresa tu correo."
-                            password.isBlank() -> mensajeError = "Por favor ingresa tu contraseña."
-                            else -> {
-                                cargando = true
-                                coroutineScope.launch {
-                                    val loginExitoso = AuthService.iniciarSesion(email, password)
-                                    cargando = false
-                                    if (loginExitoso) {
-                                        sessionManager.guardarSesion(email)
-                                        onLoginExitoso()
-                                    } else {
-                                        mensajeError = "Correo o contraseña incorrectos."
-                                    }
-                                }
+                        if (nombre.isBlank() || email.isBlank() || password.isBlank()) {
+                            mensajeError = "Por favor, llena todos los campos."
+                        } else {
+                            cargando = true
+                            // Aquí se simula o conecta con tu AuthService
+                            coroutineScope.launch {
+                                // val exito = AuthService.registrarUsuario(nombre, email, password)
+                                // if (exito) onRegistroExitoso() else mensajeError = "Error al registrar"
+                                cargando = false
+                                onRegistroExitoso() // <- Quitar esto cuando uses tu AuthService real
                             }
                         }
                     },
-                    enabled = !cargando,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(20.dp), // Botón muy curvo y amigable
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AcentoPrincipal,
-                        contentColor = Color.White
-                    )
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AcentoPrincipal)
                 ) {
                     if (cargando) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        Text(text = "Entrar de forma segura", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text("Crear cuenta", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // --- ÁREA DE REGISTRO ---
+                // --- SEPARADOR VISUAL ---
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Divider(modifier = Modifier.weight(1f), color = Color(0xFFE5E7EB))
+                    Text(" o regístrate con ", color = TextoGris, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 8.dp))
+                    Divider(modifier = Modifier.weight(1f), color = Color(0xFFE5E7EB))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // --- BOTÓN DE GOOGLE ---
+                OutlinedButton(
+                    onClick = { /* Pendiente de integrar Firebase Auth */ },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextoOscuro)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Letra G colorida de Google
+                        Text("G", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFDB4437))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("Continuar con Google", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // --- REDIRECCIÓN A LOGIN ---
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("¿Es tu primera vez aquí?", fontSize = 14.sp, color = TextoGris)
-                    TextButton(onClick = { onRegistroClick() }) {
-                        Text("Crear cuenta", fontSize = 14.sp, color = AcentoPrincipal, fontWeight = FontWeight.Bold)
+                    Text("¿Ya tienes una cuenta?", fontSize = 14.sp, color = TextoGris)
+                    TextButton(onClick = { onLoginClick() }) {
+                        Text("Inicia Sesión", fontSize = 14.sp, color = AcentoPrincipal, fontWeight = FontWeight.Bold)
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp)) // Espacio extra al fondo
             }
         }
     }

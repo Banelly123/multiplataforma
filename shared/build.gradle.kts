@@ -29,6 +29,8 @@ kotlin {
         browser()
     }
 
+    // REGLA DE COMPILACIÓN: Se eliminaron targets de iOS y Web (JS/Wasm) para evitar fallos de resolución en Windows
+
     androidLibrary {
         namespace = "com.example.multiplataforma.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -52,6 +54,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation("androidx.activity:activity-compose:1.9.0")
             implementation("io.ktor:ktor-client-android:3.0.0")
+            implementation("org.osmdroid:osmdroid-android:6.1.18")
+            implementation("androidx.activity:activity-compose:1.9.0")
         }
         androidMain.dependencies {
             implementation("org.osmdroid:osmdroid-android:6.1.18")
@@ -63,15 +67,16 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+
+            // Motores de conexión HTTP nativos de Ktor
             implementation("io.ktor:ktor-client-core:3.0.0")
             implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-        }
-        jsMain.dependencies {
-            implementation(libs.wrappers.browser)
         }
     }
 }
