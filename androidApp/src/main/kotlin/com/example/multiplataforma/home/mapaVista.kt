@@ -1,4 +1,4 @@
-package com.example.myapplicationuvu.home
+package com.example.multiplataforma.home
 
 import android.content.Context
 import androidx.compose.runtime.Composable

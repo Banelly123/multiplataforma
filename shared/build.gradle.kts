@@ -19,36 +19,42 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     js {
         browser()
     }
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
     }
-    
+
     androidLibrary {
-       namespace = "com.example.multiplataforma.shared"
-       compileSdk = libs.versions.android.compileSdk.get().toInt()
-       minSdk = libs.versions.android.minSdk.get().toInt()
-    
-       compilerOptions {
-           jvmTarget = JvmTarget.JVM_11
-       }
-       androidResources {
-           enable = true
-       }
-       withHostTest {
-           isIncludeAndroidResources = true
-       }
+        namespace = "com.example.multiplataforma.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+        androidResources {
+            enable = true
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation("androidx.activity:activity-compose:1.9.0")
             implementation("io.ktor:ktor-client-android:3.0.0")
+        }
+        androidMain.dependencies {
+            implementation("org.osmdroid:osmdroid-android:6.1.18")
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -57,13 +63,8 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            // El motor principal de Ktor para conectarse a internet
             implementation("io.ktor:ktor-client-core:3.0.0")
-            // El plugin para poder enviar y recibir JSON
             implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
-            // La libreria que hace el trabajo de traducir los datos a JSON
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
         }
         commonTest.dependencies {
